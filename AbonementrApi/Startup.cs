@@ -1,6 +1,8 @@
 ﻿using Api.DbInit;
 using Data.Abonent;
+using Data.Context;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -28,6 +30,7 @@ public class Startup
 
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddScoped<IAbonentRepository, AbonentRepository>();
+        services.AddDbContext<AbonentrContext>();
 
         Task.Run(async () => await DatabaseInitializer.InitializeAsync());
         
@@ -80,6 +83,10 @@ public class Startup
             endpoints.MapControllers();
             endpoints.MapControllerRoute("default", "{controller=Account}/{action=Index}/{id?}");
         });
+        
+        var context = app.ApplicationServices.GetRequiredService<AbonentrContext>();
+        context.Database.EnsureCreated();
+        
         ConfigureSwagger(app);
     }
 

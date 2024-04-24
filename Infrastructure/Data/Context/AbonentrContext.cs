@@ -1,17 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Data.Context;
 
 public class AbonentrContext : DbContext
 {
-    public DbSet<Core.Model.Abonent> Abonents { get; set; }
-    public DbSet<Core.Model.PhoneNumber> PhoneNumbers { get; set; }
-    public DbSet<Core.Model.PhoneNumberType> PhoneNumberTypes { get; set; }
-    public DbSet<Core.Model.Streets> Streets { get; set; }
-    public DbSet<Core.Model.Address> Addresses { get; set; }
+    private static readonly IConfiguration Configuration = null!;
 
-    protected override async void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public required DbSet<Core.Model.Abonent> Abonents { get; set; }
+    public required DbSet<Core.Model.PhoneNumber> PhoneNumbers { get; set; }
+    public required DbSet<Core.Model.PhoneNumberType> PhoneNumberTypes { get; set; }
+    public required DbSet<Core.Model.Streets> Streets { get; set; }
+    public required DbSet<Core.Model.Address> Addresses { get; set; }
+
+    public static SqliteConnection Connection { get; } =
+        new SqliteConnection(Configuration.GetConnectionString("sqlite"));
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=sample;Mode=Memory;Cache=Shared");
+        optionsBuilder.UseSqlite(Configuration.GetConnectionString("sqlite")!);
     }
 }

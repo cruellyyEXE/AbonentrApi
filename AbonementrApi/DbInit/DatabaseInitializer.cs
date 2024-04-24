@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Microsoft.Data.Sqlite;
+using Data.Context;
 
 namespace Api.DbInit;
 
@@ -7,16 +7,15 @@ public static class DatabaseInitializer
 {
     public static async Task InitializeAsync()
     {
-        var connection = new SqliteConnection("Data Source=sample;Mode=Memory;Cache=Shared");
-        connection.Open();
-
-         await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_abonents(" +
+        await AbonentrContext.Connection.OpenAsync();
+        
+         await AbonentrContext.Connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_abonents(" +
                                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
                                        "first_name VARCHAR(50) NOT NULL, " +
                                        "last_name VARCHAR(50) NOT NULL, " +
                                        "patronymic VARCHAR(50) NOT NULL);");
 
-         await connection.ExecuteAsync(
+         await AbonentrContext.Connection.ExecuteAsync(
              "insert or ignore into re_abonents (id, first_name, last_name, patronymic) " +
              "values (1, 'Емельянов', 'Антон', 'Анатольевич');" + 
              "insert or ignore into re_abonents (id, first_name, last_name, patronymic) " +
@@ -28,26 +27,26 @@ public static class DatabaseInitializer
              "insert or ignore into re_abonents (id, first_name, last_name, patronymic) " +
              "values (5, 'Колосс', 'Григорий', 'Павлович');");
          
-         await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS dir_phone_number_types(" +
+         await AbonentrContext.Connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS dir_phone_number_types(" +
                                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
                                        "name VARCHAR(50) NOT NULL);");
 
-         await connection.ExecuteAsync(
+         await AbonentrContext.Connection.ExecuteAsync(
              "insert or ignore into dir_phone_number_types (id, name) values (1, 'Домашний');" + 
              "insert or ignore into dir_phone_number_types (id, name) values (2, 'Рабочий');" + 
              "insert or ignore into dir_phone_number_types (id, name) values (3, 'Мобильный');");
          
-         await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS dir_streets(" +
+         await AbonentrContext.Connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS dir_streets(" +
                                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
                                        "name VARCHAR(50) NOT NULL);");
 
-         await connection.ExecuteAsync(
+         await AbonentrContext.Connection.ExecuteAsync(
              "insert or ignore into dir_streets (id, name) values (1, 'Красная');" + 
              "insert or ignore into dir_streets (id, name) values (2, 'Бабушкина');" + 
              "insert or ignore into dir_streets (id, name) values (3, 'Головатого');" + 
              "insert or ignore into dir_streets (id, name) values (4, 'Дзержинского');");
 
-         await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_addresses(" +
+         await AbonentrContext.Connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_addresses(" +
                                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
                                        "country VARCHAR(50) NOT NULL, " +
                                        "town VARCHAR(50) NOT NULL, " +
@@ -56,7 +55,7 @@ public static class DatabaseInitializer
                                        "abonent_id INTEGER NOT NULL, " +
                                        "FOREIGN KEY (abonent_id) REFERENCES re_abonents(id));");
 
-         await connection.ExecuteAsync(
+         await AbonentrContext.Connection.ExecuteAsync(
              "insert or ignore into re_addresses (id, country, town, street, house, abonent_id) " +
              "values (1, 'Россия', 'Краснодар', 'Красная', '12', 1);" + 
              "insert or ignore into re_addresses (id, country, town, street, house, abonent_id) " +
@@ -68,7 +67,7 @@ public static class DatabaseInitializer
              "insert or ignore into re_addresses (id, country, town, street, house, abonent_id) " +
              "values (5, 'Россия', 'Краснодар', 'Дзержинского', '234', 5);");
          
-         await connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_phone_numbers(" +
+         await AbonentrContext.Connection.ExecuteAsync("CREATE TABLE IF NOT EXISTS re_phone_numbers(" +
                                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
                                        "number VARCHAR(50) NOT NULL, " +
                                        "abonent_id INTEGER NOT NULL, " +
@@ -76,20 +75,14 @@ public static class DatabaseInitializer
                                        "FOREIGN KEY (type_id) REFERENCES dir_phone_number_types(id)," +
                                        "FOREIGN KEY (abonent_id) REFERENCES re_abonents(id));");
 
-         await connection.ExecuteAsync(
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (1, '+7 (099) 234-11-22', 1, 1);" + 
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (2, '+7 (889) 134-13-22', 1, 2);" + 
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (3, '+7 (589) 264-11-25', 2, 2);" +
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (4, '+7 (489) 834-61-29', 2, 3);" +
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (5, '+7 (487) 834-11-29', 3, 3);" +
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (6, '+7 (489) 834-17-29', 4, 1);" +
-             "insert or ignore into re_phone_numbers (id, number, abonent_id, type_id) " +
-             "values (7, '+7 (170) 734-21-22', 5, 2);");
+         await AbonentrContext.Connection.ExecuteAsync(
+             "insert into re_phone_numbers (id, number, abonent_id, type_id) " +
+             "values (1, '+7 (099) 234-11-22', 1, 1), " +
+             "(2, '+7 (889) 134-13-22', 1, 2), " +
+             "(3, '+7 (589) 264-11-25', 2, 2), " +
+             "(4, '+7 (489) 834-61-29', 2, 3), " +
+             "(5, '+7 (487) 834-11-29', 3, 3), " +
+             "(6, '+7 (489) 834-17-29', 4, 1), " +
+             "(7, '+7 (170) 734-21-22', 5, 2);");
     }
 }

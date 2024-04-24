@@ -30,6 +30,7 @@ public class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseUrls(GetHostPort()).UseStartup<Startup>();
-            });
+            })
+            .UseDefaultServiceProvider(options => options.ValidateScopes = false);;
     }
 }
